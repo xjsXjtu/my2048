@@ -3,8 +3,9 @@
 
 #include "my2048.h"
 
-void my2048::remove_zeros(int xy, int action)
+bool my2048::remove_zeros(int xy, int action)
 {
+    bool b_changed = false;
     // caculate zeros number
     int zero_num = 0;
     switch(action)
@@ -51,6 +52,8 @@ void my2048::remove_zeros(int xy, int action)
             }
             for(int i=0; i<zero_num; i++)
                 set_val(m_size - 1 - i, xy, 0);
+
+            b_changed = (x != x_down);
         }
         break;
     case m_action_down:
@@ -66,6 +69,8 @@ void my2048::remove_zeros(int xy, int action)
             }
             for(int i=0; i<zero_num; i++)
                 set_val(i, xy, 0);
+
+            b_changed = (x != x_up);
         }
         break;
     case m_action_left:
@@ -81,6 +86,8 @@ void my2048::remove_zeros(int xy, int action)
             }
             for(int i=0; i<zero_num; i++)
                 set_val(xy, m_size - 1 - i, 0);
+        
+            b_changed = (y != y_right);
         }
         break;
     case m_action_right:
@@ -96,197 +103,179 @@ void my2048::remove_zeros(int xy, int action)
             }
             for(int i=0; i<zero_num; i++)
                 set_val(xy, i, 0);
+
+            b_changed = (y != y_left);
         }
         break;
     default:
         printf("error in my2048::remove_zeros(): %d is not an illegal action", action);
         exit(-1);
     }
-
+    return b_changed;
 }
 
-bool my2048::add_rand_val(int action)
+int my2048::get_zero_num()
 {
-    switch(action)
+    int zero_num = 0;
+    for(int i=0; i<m_size*m_size; i++)
     {
-        case m_action_up:
-            {
-                int base_index = 3 * m_size;
-                if(m_a[base_index] && m_a[base_index + 1] && m_a[base_index + 2] && m_a[base_index + 3])
-                {
-                    // already full in the bottom line
-                    return false;
-                }
-
-                // fill a rand value(2 or 4) in a random blank cell 
-                int rand_index = rand() % m_size + base_index;
-                while(m_a[rand_index])
-                {
-                    rand_index = rand() % m_size + base_index;
-                }
-                m_a[rand_index] = gen_a_rand_val();
-            }
-            break;
-
-        case m_action_down:
-            {
-                int base_index = 0 * m_size;
-                if(m_a[base_index] && m_a[base_index + 1] && m_a[base_index + 2] && m_a[base_index + 3])
-                {
-                    // already full in the top line
-                    return false;
-                }
-
-                // fill a rand value(2 or 4) in a random blank cell 
-                int rand_index = rand() % m_size + base_index;
-                while(m_a[rand_index])
-                {
-                    rand_index = rand() % m_size + base_index;
-                }
-                m_a[rand_index] = gen_a_rand_val();
-            }
-            break;
-
-        case m_action_left:
-            {
-            int base_index = m_size - 1;
-            if(m_a[base_index] && m_a[base_index + 1 * m_size] && m_a[base_index + 2 * m_size] && m_a[base_index + 3 * m_size])
-            {
-                // already full in the right line
-                return false;
-            }
-
-            // fill a rand value(2 or 4) in a random blank cell 
-            int rand_index = base_index + (rand() % m_size) * m_size;
-            while(m_a[rand_index])
-            {
-                rand_index = base_index + (rand() % m_size) * m_size;
-            }
-            m_a[rand_index] = gen_a_rand_val();
-            }
-            break;
-
-        case m_action_right:
-            {
-                int base_index = 0;
-                if(m_a[base_index] && m_a[base_index + 1 * m_size] && m_a[base_index + 2 * m_size] && m_a[base_index + 3 * m_size])
-                {
-                    // already full in the left line
-                    return false;
-                }
-
-                // fill a rand value(2 or 4) in a random blank cell 
-                int rand_index = base_index + (rand() % m_size) * m_size;
-                while(m_a[rand_index])
-                {
-                    rand_index = base_index + (rand() % m_size) * m_size;
-                }
-                m_a[rand_index] = gen_a_rand_val();
-            }
-            break;
-
-        default:
-            printf("error action!!");
-            exit(-1);
+        if(m_a[i]==0)
+        {
+            zero_num++;
+        }
     }
+    return zero_num;
+}
+bool my2048::add_rand_val(void)
+{
+    int zero_num = get_zero_num();
+    if(zero_num == 0)
+        return false;
+
+    int rand_index = rand() % zero_num;
+    int rand_val = gen_a_rand_val();
+
+    for(int i=0; i<m_size*m_size; i++)
+    {
+        if(m_a[i] == 0)
+        {
+            if(rand_index == 0)
+            {
+                m_a[i] = rand_val;
+                break;
+            }
+            rand_index--;
+        }
+    }
+    return true;
 }
 
 bool my2048::action_up()
 {
+    bool b_changed = false;
     for(int y = 0; y < m_size; y++)
     {
-        remove_zeros(y, m_action_up);
+        b_changed |= remove_zeros(y, m_action_up);
         for(int x=0; x<m_size-1; )
         {
-            if(get_val(x, y) == get_val(x+1, y))
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x+1, y))
             {
                 set_val(x, y, 2 * get_val(x, y));
                 set_val(x+1, y, 0);
                 x += 2;
+                b_changed = true;
             }
             else
             {
                 x++;
             }
         }
-        remove_zeros(y, m_action_up);
+        b_changed |= remove_zeros(y, m_action_up);
     }
-    // add new rand val
-    return add_rand_val(m_action_up);
+    return b_changed;
 }
 
 bool my2048::action_down()
 {
+    bool b_changed = false;
     for(int y = 0; y < m_size; y++)
     {
-        remove_zeros(y, m_action_down);
+        b_changed |= remove_zeros(y, m_action_down);
         for(int x=m_size-1; x>0; )
         {
-            if(get_val(x, y) == get_val(x-1, y))
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x-1, y))
             {
                 set_val(x, y, 2 * get_val(x, y));
                 set_val(x-1, y, 0);
                 x -= 2;
+                b_changed = true;
             }
             else
             {
                 x--;
             }
         }
-        remove_zeros(y, m_action_down);
+        b_changed |= remove_zeros(y, m_action_down);
     }
-
-    return add_rand_val(m_action_down);
+    return b_changed;
 }
 
 bool my2048::action_left()
 {
+    bool b_changed = false;
     for(int x = 0; x < m_size; x++)
     {
-        remove_zeros(x, m_action_left);
+        b_changed |= remove_zeros(x, m_action_left);
         for(int y=0; y<m_size-1; )
         {
-            if(get_val(x, y) == get_val(x, y+1))
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x, y+1))
             {
                 set_val(x, y, 2 * get_val(x, y));
                 set_val(x, y+1, 0);
                 y += 2;
+                b_changed = true;
             }
             else
             {
                 y++;
             }
         }
-        remove_zeros(x, m_action_left);
+        b_changed |= remove_zeros(x, m_action_left);
     }
-    return add_rand_val(m_action_left);
+    return b_changed;
 }
 
 bool my2048::action_right()
 {
+    bool b_changed = false;
     for(int x = 0; x < m_size; x++)
     {
-        remove_zeros(x, m_action_right);
+        b_changed |= remove_zeros(x, m_action_right);
         for(int y=m_size-1; y>0; )
         {
-            if(get_val(x, y) == get_val(x, y-1))
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x, y-1))
             {
                 set_val(x, y, 2 * get_val(x, y));
                 set_val(x, y-1, 0);
                 y -= 2;
+                b_changed = true;
             }
             else
             {
                 y--;
             }
         }
-        remove_zeros(x, m_action_right);
+        b_changed |= remove_zeros(x, m_action_right);
     }
-
-    return add_rand_val(m_action_right);
+    return b_changed;
 }
 
-void my2048::print()
+bool my2048::is_lost()
+{
+    int x=0, y=0;
+    for(x=0; x<m_size; x++)
+    {
+        for(y=0; y<m_size-1; y++)
+        {
+            if(get_val(x, y) == 0 || get_val(x, y) == get_val(x, y+1))
+                return false;
+        }
+        if(get_val(x, y) == 0)
+            return false;
+    }
+    for(y=0; y<m_size; y++)
+    {
+        for(x=0; x<m_size-1; x++)
+        {
+            if(get_val(x, y) == 0 || get_val(x, y) == get_val(x+1, y))
+                return false;
+        }
+        if(get_val(x, y) == 0)
+            return false;
+    }
+    return true;
+}
+void my2048::print(bool b_going)
 {
     // clear screen 
     system("cls");
@@ -323,11 +312,16 @@ void my2048::print()
         printf("--------");
     }
     printf("-\n");
+
+    if(!b_going)
+    {
+        printf("Lose! Press q to try again.\n");
+    }
 }
 
 bool my2048::play()
 {
-    print();
+    print(!is_lost());
     while(1)
     {
         // quit
@@ -335,22 +329,29 @@ bool my2048::play()
         if(ch == 'q')
             break;
 
+        bool b_changed = true;
         switch(ch)
         {
         case 'w':
-            action_up();
+            b_changed = action_up();
             break;
         case 's':
-            action_down();
+            b_changed = action_down();
             break;
         case 'a':
-            action_left();
+            b_changed = action_left();
             break;
         case 'd':
-            action_right();
+            b_changed = action_right();
             break;
+        default:
+            continue;
         }
-        print();
+        if(b_changed)
+        {
+            add_rand_val();
+        }
+        print(!is_lost());
     }
     return true;
 }

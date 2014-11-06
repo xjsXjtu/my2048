@@ -52,11 +52,12 @@ private:
 
     int gen_a_rand_val()
     {
-        return rand() % 2 ? 2 : 4;
+        return rand() % 3 < 2 ? 2 : 4;
     }
 
-    void remove_zeros(int xy, int action);  // remove zeros in the x'th rows or y's colums 
-    bool add_rand_val(int action);          // invoked in the end of action_xxx()
+    int get_zero_num();
+    bool remove_zeros(int xy, int action);  // remove zeros in the x'th rows or y's colums 
+    bool add_rand_val(void);                // invoked in the end of action_xxx()
 
     // action_xxx(): caculate any possible accumulations, and then invoke add_rand_val(xxx)
     bool action_up();
@@ -64,7 +65,8 @@ private:
     bool action_left();
     bool action_right();
 
-    void print();
+    bool is_lost();
+    void print(bool b_going);
 
 public:
     bool play();
