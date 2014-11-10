@@ -42,10 +42,51 @@ std::vector<int> auto2048::evaluate_one_method(PFUN pfun_autoplay)
 
 void auto2048::evaluate_all_methods()
 {
-    std::cout << "max score for simple method:" << std::endl;
-    std::vector<int> max_vec = evaluate_one_method(&auto2048::autoplay_simple);
+    std::cout << "[auto2048] max score for simple method:" << std::endl;
+    std::vector<int>    max_vec = evaluate_one_method(&auto2048::autoplay_simple);
+    std::vector<double> statics = calculate_statics(max_vec);
     for(int i=0; i<max_vec.size(); i++)
     {
         std::cout << max_vec[i] << std::endl;
     }
+    std::cout << "Max: " << statics[0] << "\tMin: " << statics[1] << "\tAvg: " << statics[2] << "\tStandard Deviation: " << statics[3] << std::endl;
+    
+
+    std::cout << "max score for max_zeor_num method:" << std::endl;
+}
+
+std::vector<double> auto2048::calculate_statics(std::vector<int> v)
+{
+    std::vector<double> ret(4);
+
+    if(v.size() == 0)
+    {
+        ret.clear();
+        return ret;
+    }
+
+    double max_v, min_v, avg_v, sd_v;
+    max_v = min_v = avg_v = v[0];
+    sd_v = 0.0;
+
+    for(int i=1; i<v.size(); i++)
+    {
+        max_v = max_v > v[i] ? max_v : v[i]; 
+        min_v = min_v < v[i] ? min_v : v[i];
+        avg_v += v[i];
+    }
+    avg_v /= v.size();
+
+    sd_v = 0.0;
+    for(int i=0; i<v.size(); i++)
+    {
+        sd_v += (v[i] - avg_v) * (v[i] - avg_v);
+    }
+    sd_v = sqrt(sd_v / v.size());
+
+    ret[0] = max_v;
+    ret[1] = min_v;
+    ret[2] = avg_v;
+    ret[3] = sd_v;
+    return ret;
 }

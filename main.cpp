@@ -67,6 +67,6 @@ void test_auto2048_with_show()
 
 void evalate_auto2048()
 {
-    auto2048 ap(7);
+    auto2048 ap(4);
     ap.evaluate_all_methods();
 }

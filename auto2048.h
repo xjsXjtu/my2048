@@ -37,6 +37,13 @@ public:
     typedef int (auto2048::*PFUN)(bool);
     std::vector<int> evaluate_one_method(PFUN pfun_autoplay);   // playing 100 times. return value: a 100-element vector containg max-value of each time.
     void evaluate_all_methods();                                // evualte all autoplay methods.
+
+    // return val:
+    //  val[0]: max
+    //  val[1]: min
+    //  val[2]: average
+    //  val[3]: standard deviation
+    std::vector<double> calculate_statics(std::vector<int> v);
 };
 
 #endif
