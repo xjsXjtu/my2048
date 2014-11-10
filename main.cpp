@@ -67,12 +67,6 @@ void test_auto2048_with_show()
 
 void evalate_auto2048()
 {
-    auto2048 ap(3);
-    
-    std::cout << "max score for simple method:" << std::endl;
-    std::vector<int> max_vec = ap.evaluate(auto2048::ap_simple);
-    for(int i=0; i<max_vec.size(); i++)
-    {
-        std::cout << max_vec[i] << std::endl;
-    }
+    auto2048 ap(7);
+    ap.evaluate_all_methods();
 }

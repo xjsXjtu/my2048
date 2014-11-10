@@ -288,8 +288,6 @@ bool my2048::is_lost()
 }
 void my2048::print()
 {
-    // clear screen 
-    clear_screen();
     printf("a: left; d: right\n");
     printf("w: up  ; s: down\n");
     printf("q: quit\n\n");
@@ -391,6 +389,7 @@ bool my2048::play()
             continue;
         }
         respond_one_action(action);
+        clear_screen();
         print();
     }
     return true;

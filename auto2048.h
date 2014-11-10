@@ -34,9 +34,9 @@ public:
     int autoplay_simple(bool b_show);
 
 public:
-    typedef int autoplay_t;
-    static const autoplay_t ap_simple = 0;
-    std::vector<int> evaluate(const autoplay_t t);     // playing 100 times. return value: a 100-element vector containg max-value of each time.
+    typedef int (auto2048::*PFUN)(bool);
+    std::vector<int> evaluate_one_method(PFUN pfun_autoplay);   // playing 100 times. return value: a 100-element vector containg max-value of each time.
+    void evaluate_all_methods();                                // evualte all autoplay methods.
 };
 
 #endif

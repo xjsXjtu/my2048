@@ -18,30 +18,34 @@ int auto2048::autoplay_simple(bool b_show)
 
         if(b_show)
         {
+            game.clear_screen();
             game.print();
             Sleep(500);
         }
     }
+    game.print();
     return game.get_max_val();
 }
 
-std::vector<int> auto2048::evaluate(const autoplay_t t)
+std::vector<int> auto2048::evaluate_one_method(PFUN pfun_autoplay)
 {
     std::vector<int> ret;
     for(int i=0; i<100; i++)
     {
-        int max_val;
-        switch(t)
-        {
-        case ap_simple:
-            max_val = autoplay_simple(false);
-            break;
-        default:
-            std::cout << "[auto2048] Unsupported autoplay type." << std::endl;
-            break;
-        }
+        Sleep(2); // to get different rand() seed.
+        game.init(game.size());
+        int max_val = (this->*pfun_autoplay)(false);
         ret.push_back(max_val);
     }
     return ret;
 }
 
+void auto2048::evaluate_all_methods()
+{
+    std::cout << "max score for simple method:" << std::endl;
+    std::vector<int> max_vec = evaluate_one_method(&auto2048::autoplay_simple);
+    for(int i=0; i<max_vec.size(); i++)
+    {
+        std::cout << max_vec[i] << std::endl;
+    }
+}

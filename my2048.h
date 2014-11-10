@@ -85,7 +85,7 @@ private:
     // init rand(), actually just set a seed.
     void rand_init()
     {
-        srand((unsigned)time(0));
+        srand((unsigned)clock());
     }
 
     int gen_a_rand_val()
@@ -105,6 +105,7 @@ private:
     bool accumulate_right();
     
 public:
+    int size() {return m_size;}
     int get_zero_num();
     int get_max_val();
     bool is_lost();
