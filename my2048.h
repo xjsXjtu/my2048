@@ -9,29 +9,67 @@ private:
     int m_size;
     int *m_a;
 
+public:
     static const int m_action_up    = 0;
     static const int m_action_down  = 1;
     static const int m_action_left  = 2;
     static const int m_action_right = 3;
 
 public:
+    my2048()
+    {
+#ifdef DEBUG_2048
+        printf("[my2048] I am conscructor #1 of class m2048. size = 4\n");
+#endif
+        m_a = NULL;
+        init(4);
+    }
+
     my2048(int size)
-    {   
+    {
+#ifdef DEBUG_2048
+        printf("[my2048] I am conscructor #2 of class m2048. size = $d\n", size);
+#endif
+        m_a = NULL;
+        init(size);
+    }
+
+    void init(int size)
+    {
+        destroy();
+
         if(size <=1)
         {
-            printf("Not valid size.\n");
+            printf("[my2048] Not valid size.\n");
             return;
         }
         m_size = size;
+#ifdef DEBUG_2048
+        printf("[my2048] Allocating memory: %d Bytes\n", sizeof(int) * m_size * m_size);
+#endif
         m_a = (int*)malloc(sizeof(int) * m_size * m_size);
         memset(&m_a[0], 0, sizeof(int) * m_size * m_size);
         rand_init();
-        set_val(rand() % m_size, rand() % m_size, 2);
+        set_val(rand() % m_size, rand() % m_size, 2);  
     }
     
     ~my2048()
     {
-        free(m_a);
+#ifdef DEBUG_2048
+        printf("[my2048] I am descructor of class m2048\n");
+#endif
+        destroy();
+    }
+
+    void destroy()
+    {
+        if(m_a)
+        {
+#ifdef DEBUG_2048
+            printf("[my2048] Freeing memory.\n");
+#endif
+            free(m_a);
+        }
     }
 
 private:
@@ -55,21 +93,27 @@ private:
         return rand() % 3 < 2 ? 2 : 4;
     }
 
-    int get_zero_num();
     bool remove_zeros(int xy, int action);  // remove zeros in the x'th rows or y's colums 
-    bool add_rand_val(void);                // invoked in the end of action_xxx()
+    bool add_rand_val(void);                // invoked after invoking accumulate_xxx()
 
-    // action_xxx(): caculate any possible accumulations, and then invoke add_rand_val(xxx)
-    bool action_up();
-    bool action_down();
-    bool action_left();
-    bool action_right();
-
-    bool is_lost();
-    void print(bool b_going);
-
+private:
+    // accumulate_xxx(): caculate any possible accumulations
+    // return val: True if any accumulation happen.
+    bool accumulate_up();
+    bool accumulate_down();
+    bool accumulate_left();
+    bool accumulate_right();
+    
 public:
-    bool play();
+    int get_zero_num();
+    int get_max_val();
+    bool is_lost();
+
+    bool respond_one_action(int action); // invoking accumulate_xxx(), then invoking add-rand_val(). return val: True if anything changed
+    bool play();                         // manually play
+
+    void print();
+    void clear_screen();
 };
 
 #endif

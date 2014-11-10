@@ -126,6 +126,17 @@ int my2048::get_zero_num()
     }
     return zero_num;
 }
+
+int my2048::get_max_val()
+{
+    int max = m_a[0];
+    for(int i=1; i<m_size*m_size; i++)
+    {
+        max = max > m_a[i] ? max : m_a[i];
+    }
+    return max;
+}
+
 bool my2048::add_rand_val(void)
 {
     int zero_num = get_zero_num();
@@ -150,7 +161,7 @@ bool my2048::add_rand_val(void)
     return true;
 }
 
-bool my2048::action_up()
+bool my2048::accumulate_up()
 {
     bool b_changed = false;
     for(int y = 0; y < m_size; y++)
@@ -175,7 +186,7 @@ bool my2048::action_up()
     return b_changed;
 }
 
-bool my2048::action_down()
+bool my2048::accumulate_down()
 {
     bool b_changed = false;
     for(int y = 0; y < m_size; y++)
@@ -200,7 +211,7 @@ bool my2048::action_down()
     return b_changed;
 }
 
-bool my2048::action_left()
+bool my2048::accumulate_left()
 {
     bool b_changed = false;
     for(int x = 0; x < m_size; x++)
@@ -225,7 +236,7 @@ bool my2048::action_left()
     return b_changed;
 }
 
-bool my2048::action_right()
+bool my2048::accumulate_right()
 {
     bool b_changed = false;
     for(int x = 0; x < m_size; x++)
@@ -275,10 +286,10 @@ bool my2048::is_lost()
     }
     return true;
 }
-void my2048::print(bool b_going)
+void my2048::print()
 {
     // clear screen 
-    system("cls");
+    clear_screen();
     printf("a: left; d: right\n");
     printf("w: up  ; s: down\n");
     printf("q: quit\n\n");
@@ -313,45 +324,74 @@ void my2048::print(bool b_going)
     }
     printf("-\n");
 
-    if(!b_going)
+    if(is_lost())
     {
         printf("Lose! Press q to try again.\n");
     }
 }
 
+void my2048::clear_screen()
+{
+    system("cls");
+}
+
+bool my2048::respond_one_action(int action)
+{
+    bool b_changed = false;
+    switch(action)
+        {
+        case m_action_up:
+            b_changed = accumulate_up();
+            break;
+        case m_action_down:
+            b_changed = accumulate_down();
+            break;
+        case m_action_left:
+            b_changed = accumulate_left();
+            break;
+        case m_action_right:
+            b_changed = accumulate_right();
+            break;
+        default:
+            printf("[my2048] Error action.\n");
+            exit(-1);
+        }
+        if(b_changed)
+        {
+            add_rand_val();
+        }
+        return b_changed;
+}
+
 bool my2048::play()
 {
-    print(!is_lost());
+    print();
     while(1)
     {
         // quit
         char ch = getch();
         if(ch == 'q')
             break;
-
-        bool b_changed = true;
+        int action;
         switch(ch)
         {
         case 'w':
-            b_changed = action_up();
+            action = m_action_up;
             break;
         case 's':
-            b_changed = action_down();
+            action = m_action_down;
             break;
         case 'a':
-            b_changed = action_left();
+            action = m_action_left;
             break;
         case 'd':
-            b_changed = action_right();
+            action = m_action_right;
             break;
         default:
             continue;
         }
-        if(b_changed)
-        {
-            add_rand_val();
-        }
-        print(!is_lost());
+        respond_one_action(action);
+        print();
     }
     return true;
 }

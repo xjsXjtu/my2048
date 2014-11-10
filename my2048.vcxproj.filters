@@ -21,9 +21,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="auto2048.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my2048.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="auto2048.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

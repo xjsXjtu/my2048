@@ -41,6 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);DEBUG_2048=1</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -60,10 +61,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="auto2048.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my2048.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="auto2048.h" />
     <ClInclude Include="my2048.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

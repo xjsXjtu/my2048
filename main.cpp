@@ -3,9 +3,37 @@
 #include "conio.h"
 
 #include "my2048.h"
+#include "auto2048.h"
+
+void test_destructor();
+void test_manual_play();
+void test_auto2048_with_show();
+void evalate_auto2048();
 
 int main()
 {
+    // test_destructor();
+    // test_manual_play();
+    
+    // test_auto2048_with_show();
+    evalate_auto2048();
+
+    system("pause");
+    return 0;
+}
+
+void test_destructor()
+{
+    {
+        my2048 a;
+        a.init(10);
+    }
+    system("pause");
+}
+
+void test_manual_play()
+{
+
     while(1)
     {
         std::string str;
@@ -28,5 +56,23 @@ int main()
         my2048 pl(size);
         pl.play();
     }
-    return 0;
+}
+
+void test_auto2048_with_show()
+{
+    auto2048 ap(3);
+    int max_val = ap.autoplay_simple(true);
+    std::cout << max_val << std::endl;
+}
+
+void evalate_auto2048()
+{
+    auto2048 ap(3);
+    
+    std::cout << "max score for simple method:" << std::endl;
+    std::vector<int> max_vec = ap.evaluate(auto2048::ap_simple);
+    for(int i=0; i<max_vec.size(); i++)
+    {
+        std::cout << max_vec[i] << std::endl;
+    }
 }
