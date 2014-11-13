@@ -26,12 +26,16 @@ public:
     }
     
 public:
-    // stratage: always move up, if not move right, if not move down, if not move left, if not move up ...
     // input val: 
     //      b_show: if true, print the cells and pause 0.5 sec after each action.
     // return val: 
     //      the max value of the cells when game over.
-    int autoplay_simple(bool b_show);
+    
+    // stratage: always move up, if not move right, if not move down, if not move left, if not move up ...
+    int autoplay_stubborn(bool b_show);
+    // stratage: the move derection is random.
+    int autoplay_random(bool b_show);
+
 
 public:
     typedef int (auto2048::*PFUN)(bool);

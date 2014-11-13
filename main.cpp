@@ -18,7 +18,7 @@ int main()
     // test_auto2048_with_show();
     evalate_auto2048();
 
-    system("pause");
+    // system("pause");
     return 0;
 }
 
@@ -61,7 +61,7 @@ void test_manual_play()
 void test_auto2048_with_show()
 {
     auto2048 ap(3);
-    int max_val = ap.autoplay_simple(true);
+    int max_val = ap.autoplay_random(true);
     std::cout << max_val << std::endl;
 }
 

@@ -3,7 +3,7 @@
 #include "windows.h"
 #include "auto2048.h"
 
-int auto2048::autoplay_simple(bool b_show)
+int auto2048::autoplay_stubborn(bool b_show)
 {
     int action_direction[4] = {my2048::m_action_up, my2048::m_action_right, my2048::m_action_down, my2048::m_action_left};
     int action_index = 0;
@@ -13,6 +13,7 @@ int auto2048::autoplay_simple(bool b_show)
         bool b_changed = game.respond_one_action(action_direction[action_index]);
         if(!b_changed)
         {
+            // stubborn action
             action_index = (action_index + 1) % 4;
         }
 
@@ -27,6 +28,30 @@ int auto2048::autoplay_simple(bool b_show)
     return game.get_max_val();
 }
 
+int auto2048::autoplay_random(bool b_show)
+{
+    int action_direction[4] = {my2048::m_action_up, my2048::m_action_right, my2048::m_action_down, my2048::m_action_left};
+    int action_index = 0;
+
+    while(!game.is_lost())
+    {
+        bool b_changed = game.respond_one_action(action_direction[action_index]);
+        if(!b_changed)
+        {
+            // randmized action
+            action_index = rand() % 4;
+        }
+
+        if(b_show)
+        {
+            game.clear_screen();
+            game.print();
+            Sleep(500);
+        }
+    }
+    game.print();
+    return game.get_max_val();
+}
 std::vector<int> auto2048::evaluate_one_method(PFUN pfun_autoplay)
 {
     std::vector<int> ret;
@@ -42,17 +67,27 @@ std::vector<int> auto2048::evaluate_one_method(PFUN pfun_autoplay)
 
 void auto2048::evaluate_all_methods()
 {
-    std::cout << "[auto2048] max score for simple method:" << std::endl;
-    std::vector<int>    max_vec = evaluate_one_method(&auto2048::autoplay_simple);
-    std::vector<double> statics = calculate_statics(max_vec);
-    for(int i=0; i<max_vec.size(); i++)
+    std::cout << "[auto2048] max score for 'stubborn' method:" << std::endl;
     {
-        std::cout << max_vec[i] << std::endl;
+        std::vector<int>    max_vec_stubborn = evaluate_one_method(&auto2048::autoplay_stubborn);
+        std::vector<double> statics_stubborn = calculate_statics(max_vec_stubborn);
+        for(int i=0; i<max_vec_stubborn.size(); i++)
+        {
+            std::cout << max_vec_stubborn[i] << std::endl;
+        }
+        std::cout << "Max: " << statics_stubborn[0] << "\tMin: " << statics_stubborn[1] << "\tAvg: " << statics_stubborn[2] << "\tStandard Deviation: " << statics_stubborn[3] << std::endl;
     }
-    std::cout << "Max: " << statics[0] << "\tMin: " << statics[1] << "\tAvg: " << statics[2] << "\tStandard Deviation: " << statics[3] << std::endl;
-    
 
-    std::cout << "max score for max_zeor_num method:" << std::endl;
+    std::cout << "[auto2048] max score for 'rand' method:" << std::endl;
+    {
+        std::vector<int>    max_vec_random = evaluate_one_method(&auto2048::autoplay_random);
+        std::vector<double> statics_random = calculate_statics(max_vec_random);
+        for(int i=0; i<max_vec_random.size(); i++)
+        {
+            std::cout << max_vec_random[i] << std::endl;
+        }
+        std::cout << "Max: " << statics_random[0] << "\tMin: " << statics_random[1] << "\tAvg: " << statics_random[2] << "\tStandard Deviation: " << statics_random[3] << std::endl;
+    }
 }
 
 std::vector<double> auto2048::calculate_statics(std::vector<int> v)
