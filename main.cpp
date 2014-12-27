@@ -13,12 +13,13 @@ void evalate_auto2048();
 int main()
 {
     // test_destructor();
-    // test_manual_play();
+    test_manual_play();
     
     // test_auto2048_with_show();
-    evalate_auto2048();
+    //evalate_auto2048();
 
-    // system("pause");
+	printf("Hello world.\n");
+    system("pause");
     return 0;
 }
 
@@ -38,10 +39,10 @@ void test_manual_play()
     {
         std::string str;
         system("cls");
-        std::cout << "Please input the size of the game(2~9) or q(uit): ";
+        std::cout << "Please input the size of the game(2~9) or p(quit): ";
         std::cin >> str;
 
-        if(str == "q")
+        if(str == "p")
         {
             break;
         }
