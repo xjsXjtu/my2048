@@ -1,15 +1,125 @@
 #include <iostream>
-#include <assert.h>
 #include "conio.h"
 
 #include "my2048.h"
 
-int my2048::get_zero_num(int *m, int size)
+bool my2048::remove_zeros(int xy, int action)
+{
+    bool b_changed = false;
+    // caculate zeros number
+    int zero_num = 0;
+    switch(action)
+    {
+    case m_action_up: case m_action_down:
+        {
+            for(int x=0; x<m_size; x++)
+            {
+                if(get_val(x, xy) == 0)
+                {
+                    zero_num++;
+                }
+            }
+        }
+        break;
+    case m_action_left: case m_action_right:
+        {
+            for(int y=0; y<m_size; y++)
+            {
+                if(get_val(xy, y) == 0)
+                {
+                    zero_num++;
+                }
+            }
+        }
+        break;
+    default:
+        printf("error in my2048::remove_zeros(): %d is not an illegal action", action);
+        exit(-1);
+    }
+
+    // remove zeros
+    switch(action){
+    case m_action_up:
+        {
+            int x=0, x_down=0;
+            for(int i=0; i<m_size - zero_num; i++)
+            {
+                while(get_val(x_down, xy)==0)
+                    x_down++;
+                set_val(x, xy, get_val(x_down, xy));
+                x++;
+                x_down++;
+            }
+            for(int i=0; i<zero_num; i++)
+                set_val(m_size - 1 - i, xy, 0);
+
+            b_changed = (x != x_down);
+        }
+        break;
+    case m_action_down:
+        {
+            int x=m_size-1, x_up=m_size-1;
+            for(int i=0; i<m_size - zero_num; i++)
+            {
+                while(get_val(x_up, xy)==0)
+                    x_up--;
+                set_val(x, xy, get_val(x_up, xy));
+                x--;
+                x_up--;
+            }
+            for(int i=0; i<zero_num; i++)
+                set_val(i, xy, 0);
+
+            b_changed = (x != x_up);
+        }
+        break;
+    case m_action_left:
+        {
+            int y=0, y_right=0;
+            for(int i=0; i<m_size - zero_num; i++)
+            {
+                while(get_val(xy, y_right)==0)
+                    y_right++;
+                set_val(xy, y, get_val(xy, y_right));
+                y++;
+                y_right++;
+            }
+            for(int i=0; i<zero_num; i++)
+                set_val(xy, m_size - 1 - i, 0);
+        
+            b_changed = (y != y_right);
+        }
+        break;
+    case m_action_right:
+        {
+            int y=m_size-1, y_left=m_size-1;
+            for(int i=0; i<m_size - zero_num; i++)
+            {
+                while(get_val(xy, y_left)==0)
+                    y_left--;
+                set_val(xy, y, get_val(xy, y_left));
+                y--;
+                y_left--;
+            }
+            for(int i=0; i<zero_num; i++)
+                set_val(xy, i, 0);
+
+            b_changed = (y != y_left);
+        }
+        break;
+    default:
+        printf("error in my2048::remove_zeros(): %d is not an illegal action", action);
+        exit(-1);
+    }
+    return b_changed;
+}
+
+int my2048::get_zero_num()
 {
     int zero_num = 0;
-    for(int i=0; i<size; i++)
+    for(int i=0; i<m_size*m_size; i++)
     {
-        if(m[i]==0)
+        if(m_a[i]==0)
         {
             zero_num++;
         }
@@ -29,7 +139,7 @@ int my2048::get_max_val()
 
 bool my2048::add_rand_val(void)
 {
-    int zero_num = get_zero_num(m_a, m_size * m_size);
+    int zero_num = get_zero_num();
     if(zero_num == 0)
         return false;
 
@@ -50,123 +160,104 @@ bool my2048::add_rand_val(void)
     }
     return true;
 }
-void my2048::matrix_transpose(int *des, int *src, int dim)				// tranpose a square matrix
-{
-	assert(des != NULL && src != NULL);
-	for(int x=0; x<dim; x++)
-	{
-		for(int y=0; y<dim; y++)
-		{
-			des[x * dim + y] = src[y * dim + x];
-		}
-	}
-}
 
-void my2048::matrix_horizontal_symmetry(int *des, int *src, int dim)			// horizontally symmetry a square matrix
-{
-	assert(des != NULL && src != NULL);
-	for(int x=0; x<dim; x++)
-	{
-		for(int y=0; y<dim; y++)
-		{
-			des[x * dim + y] = src[x * dim + dim - 1 - y];
-		}
-	}
-}
-
-void my2048::re_organize(int *des, int *src, int dim,					// re organize m_a[...], so as to use accumulate_meta().
-						 int action, bool direction)					// direction: true->transform from m_a to re_org; false->restore from re_org to m_a 
-{
-	assert(des != NULL && src != NULL);
-	switch(action)
-	{
-	case m_action_left:
-		memcpy(des, src, m_size * m_size * sizeof(int));
-		break;
-	case m_action_right:
-		matrix_horizontal_symmetry(des, src, m_size);
-		break;
-	case m_action_up:
-		matrix_transpose(des, src, m_size);
-		break;
-	case m_action_down:
-		{
-			int *tmp = (int*)malloc(dim * dim * sizeof(int));
-			if(direction)
-			{
-				matrix_transpose(tmp, src, m_size);
-				matrix_horizontal_symmetry(des, tmp, m_size);
-			}
-			else
-			{
-				matrix_horizontal_symmetry(tmp, src, m_size);
-				matrix_transpose(des, tmp, m_size);
-			}
-			free(tmp);
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-bool my2048::remove_zeros_meta(int *meta)
-{
-	int zero_num = get_zero_num(meta, m_size);
-
-	int x=0, x_right=0;
-    for(int i=0; i<m_size - zero_num; i++)
-    {
-        while(meta[x_right] == 0)
-            x_right++;
-        meta[x] = meta[x_right];
-        x++;
-        x_right++;
-    }
-    for(int i=0; i<zero_num; i++)
-	{
-        meta[m_size - 1 - i] = 0;
-	}        
-    
-	return x != x_right;
-}
-
-bool my2048::accumulate_meta(int *meta)						// accumulate one row/colum, accumulate towards meta[0]	
-{
-	bool b_changed = false;
-
-	b_changed |= remove_zeros_meta(meta);
-    for(int x=0; x<m_size-1; )
-    {
-        if(meta[x] > 0 && meta[x] == meta[x+1])
-        {
-            meta[x] = 2 * meta[x];
-            meta[x+1] = 0;
-            x += 2;
-            b_changed = true;
-        }
-        else
-        {
-            x++;
-        }
-    }
-    b_changed |= remove_zeros_meta(meta);
-	return b_changed;
-}
-
-bool my2048::accumulate(int action)
+bool my2048::accumulate_up()
 {
     bool b_changed = false;
-	int *re_org = (int*)malloc(m_size * m_size * sizeof(int));
+    for(int y = 0; y < m_size; y++)
+    {
+        b_changed |= remove_zeros(y, m_action_up);
+        for(int x=0; x<m_size-1; )
+        {
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x+1, y))
+            {
+                set_val(x, y, 2 * get_val(x, y));
+                set_val(x+1, y, 0);
+                x += 2;
+                b_changed = true;
+            }
+            else
+            {
+                x++;
+            }
+        }
+        b_changed |= remove_zeros(y, m_action_up);
+    }
+    return b_changed;
+}
 
-	re_organize(re_org, m_a, m_size, action, true);
+bool my2048::accumulate_down()
+{
+    bool b_changed = false;
+    for(int y = 0; y < m_size; y++)
+    {
+        b_changed |= remove_zeros(y, m_action_down);
+        for(int x=m_size-1; x>0; )
+        {
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x-1, y))
+            {
+                set_val(x, y, 2 * get_val(x, y));
+                set_val(x-1, y, 0);
+                x -= 2;
+                b_changed = true;
+            }
+            else
+            {
+                x--;
+            }
+        }
+        b_changed |= remove_zeros(y, m_action_down);
+    }
+    return b_changed;
+}
+
+bool my2048::accumulate_left()
+{
+    bool b_changed = false;
     for(int x = 0; x < m_size; x++)
     {
-		int *meta = &(re_org[x * m_size]);
-		b_changed |= accumulate_meta(meta);
-	}
-	re_organize(m_a, re_org, m_size, action, false);
-	free(re_org);
+        b_changed |= remove_zeros(x, m_action_left);
+        for(int y=0; y<m_size-1; )
+        {
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x, y+1))
+            {
+                set_val(x, y, 2 * get_val(x, y));
+                set_val(x, y+1, 0);
+                y += 2;
+                b_changed = true;
+            }
+            else
+            {
+                y++;
+            }
+        }
+        b_changed |= remove_zeros(x, m_action_left);
+    }
+    return b_changed;
+}
+
+bool my2048::accumulate_right()
+{
+    bool b_changed = false;
+    for(int x = 0; x < m_size; x++)
+    {
+        b_changed |= remove_zeros(x, m_action_right);
+        for(int y=m_size-1; y>0; )
+        {
+            if(get_val(x, y) > 0 && get_val(x, y) == get_val(x, y-1))
+            {
+                set_val(x, y, 2 * get_val(x, y));
+                set_val(x, y-1, 0);
+                y -= 2;
+                b_changed = true;
+            }
+            else
+            {
+                y--;
+            }
+        }
+        b_changed |= remove_zeros(x, m_action_right);
+    }
     return b_changed;
 }
 
@@ -199,7 +290,7 @@ void my2048::print()
 {
     printf("a: left; d: right\n");
     printf("w: up  ; s: down\n");
-    printf("p: quit\n\n");
+    printf("q: quit\n\n");
 
     // print m_a[x,y]
     for(int x=0; x<m_size; x++)
@@ -233,7 +324,7 @@ void my2048::print()
 
     if(is_lost())
     {
-        printf("Lose! Press p to try again.\n");
+        printf("Lose! Press q to try again.\n");
     }
 }
 
@@ -245,12 +336,29 @@ void my2048::clear_screen()
 bool my2048::respond_one_action(int action)
 {
     bool b_changed = false;
-	b_changed = accumulate(action);
-    if(b_changed)
-    {
-        add_rand_val();
-    }
-    return b_changed;
+    switch(action)
+        {
+        case m_action_up:
+            b_changed = accumulate_up();
+            break;
+        case m_action_down:
+            b_changed = accumulate_down();
+            break;
+        case m_action_left:
+            b_changed = accumulate_left();
+            break;
+        case m_action_right:
+            b_changed = accumulate_right();
+            break;
+        default:
+            printf("[my2048] Error action.\n");
+            exit(-1);
+        }
+        if(b_changed)
+        {
+            add_rand_val();
+        }
+        return b_changed;
 }
 
 bool my2048::play()
@@ -260,7 +368,7 @@ bool my2048::play()
     {
         // quit
         char ch = getch();
-        if(ch == 'p')
+        if(ch == 'q')
             break;
         int action;
         switch(ch)

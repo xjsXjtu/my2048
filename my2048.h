@@ -73,7 +73,7 @@ public:
     }
 
 private:
-    int get_val(int x, int y)				// left & top is (0, 0)
+    int get_val(int x, int y) // left & top is (0, 0)
     {
         return m_a[x * m_size + y];
     }
@@ -82,7 +82,8 @@ private:
         m_a[x * m_size + y] = val;
     }
 
-    void rand_init()						// init rand(), actually just set a seed.
+    // init rand(), actually just set a seed.
+    void rand_init()
     {
         srand((unsigned)clock());
     }
@@ -92,21 +93,20 @@ private:
         return rand() % 3 < 2 ? 2 : 4;
     }
 
+    bool remove_zeros(int xy, int action);  // remove zeros in the x'th rows or y's colums 
+    bool add_rand_val(void);                // invoked after invoking accumulate_xxx()
+
 private:
-	void matrix_transpose(int *des, int *src, int dim);					// tranpose a square matrix
-	void matrix_horizontal_symmetry(int *des, int *src, int dim);		// horizontally symmetry a square matrix
-	void re_organize(int *des, int *src, int dim, 
-		int action, bool direction);									// re organize m_a[...], so as to use accumulate_meta().
-	bool remove_zeros_meta(int *meta);									// remove zeros in meta[0,...,(m_size-1)], towards to meta[0]
-    bool remove_zeros(int xy, int action);								// remove zeros in the x'th rows or y's colums
-	bool accumulate_meta(int *meta);									// accumulate one row/colum, accumulate towards meta[0]	
-    bool accumulate(int action);										// accumulate(), caculate any possible accumulations
-																		// return val: True if any accumulation happen.
-    bool add_rand_val(void);											// invoked after invoking accumulate_xxx()
+    // accumulate_xxx(): caculate any possible accumulations
+    // return val: True if any accumulation happen.
+    bool accumulate_up();
+    bool accumulate_down();
+    bool accumulate_left();
+    bool accumulate_right();
     
 public:
     int size() {return m_size;}
-    int get_zero_num(int *m, int size);
+    int get_zero_num();
     int get_max_val();
     bool is_lost();
 
